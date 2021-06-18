@@ -1,0 +1,251 @@
+﻿<html>
+<header>
+    <meta charset="utf-8">
+    </meta>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/echarts.js"></script>
+</header>
+
+<body>
+    <div id="echart-div" class="echart-div-css">
+        <div id="echart-div-child" class="echart-div-child-css" style="width: 100%;height: 100%;">
+        </div>
+    </div>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('echart-div-child'));
+        let jsonData = []
+        $.post("GetGraph", {}, function (res) {
+            jsonData = JSON.parse(res)
+            console.log('jsonData', jsonData)
+            var colors = [
+                "#758DEF",
+                "#DCA145",
+                "#EF90A8",
+                "#209F98"
+            ]
+            var getdata = function getData() {
+                let data = {
+                    name: "知识图谱",
+                    value: '0',
+                    children: []
+                }
+                jsonData.Result.nodes.forEach(function (node1, i) {
+                    if (jsonData.Result.links.findIndex(l => l.target == node1.id) == -1) {
+                        let item1 = {
+                            name: node1.name,
+                            value: node1.id,
+                            children: []
+                        }
+                        data.children.push(item1)
+                        // if(item1.name='图形集合'){
+                        //     item1.children.push({
+                        //         name: "探索规律",
+                        //         value: "2"
+                        //     })
+                        // }
+                        jsonData.Result.links.filter(l => l.source == node1.id).forEach(function (link1, linki) {
+                            var node2 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link1.target)]
+                            let item2 = {
+                                name: node2.name,
+                                value: node2.id,
+                                children: []
+                            }
+                            item1.children.push(item2)
+                            jsonData.Result.links.filter(l => l.source == node2.id).forEach(function (link2, linki) {
+                                var node3 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link2.target)]
+                                let item3 = {
+                                    name: node3.name,
+                                    value: node3.id,
+                                    children: []
+                                }
+                                item2.children.push(item3)
+                                jsonData.Result.links.filter(l => l.source == node3.id).forEach(function (link3, linki) {
+                                    var node4 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link3.target)]
+                                    let item4 = {
+                                        name: node4.name,
+                                        value: node4.id,
+                                        children: []
+                                    }
+                                    item3.children.push(item4)
+                                    jsonData.Result.links.filter(l => l.source == node4.id).forEach(function (link4, linki) {
+                                        var node5 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link4.target)]
+                                        let item5 = {
+                                            name: node5.name,
+                                            value: node5.id,
+                                            children: []
+                                        }
+                                        item4.children.push(item5)
+                                        jsonData.Result.links.filter(l => l.source == node5.id).forEach(function (link5, linki) {
+                                            var node6 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link5.target)]
+                                            let item6 = {
+                                                name: node6.name,
+                                                value: node6.id,
+                                                children: []
+                                            }
+                                            item5.children.push(item6)
+                                            jsonData.Result.links.filter(l => l.source == node6.id).forEach(function (link6, linki) {
+                                                var node7 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link6.target)]
+                                                let item7 = {
+                                                    name: node6.name,
+                                                    value: node6.id,
+                                                    children: []
+                                                }
+                                                item6.children.push(item7)
+                                            })
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    }
+                })
+                let arr = []
+                arr.push(data)
+                arr = handle(arr, 0)
+                return arr;
+            }
+            var handle = function handleData(data, index, color = '#D74C4F') {
+                //index标识第几层
+                return data.map((item, index2) => {
+                    //计算出颜色
+                    if (index == 1) {
+                        color = colors.find((item, eq) => eq == index2 % 10);
+                    }
+                    // 设置节点大小
+                    if (index === 0 || index === 1) {
+                        item.label = {
+                            position: "inside"
+                        }
+                    }
+                    // 设置label大小
+                    switch (index) {
+                        case 0:
+                            item.symbolSize = 150
+                            break;
+                        case 1:
+                            item.symbolSize = 70
+                            break;
+                        case 2:
+                            item.symbolSize = 60
+                            break;
+                        case 3:
+                            item.symbolSize = 50
+                            break;
+                        case 4:
+                            item.symbolSize = 40
+                            break;
+                        case 5:
+                            item.symbolSize = 30
+                            break;
+                        case 6:
+                            item.symbolSize = 20
+                            break;
+                        case 7:
+                            item.symbolSize = 10
+                            break;
+                        default:
+                            item.symbolSize = 10
+                            break;
+                    }
+                    // 设置线条颜色
+                    item.lineStyle = { color: color }
+
+                    if (item.children) {//存在子节点
+                        item.itemStyle = {
+                            borderColor: color,
+                            color: color
+                        };
+                        item.children = handle(item.children, index + 1, color)
+                    } else {//不存在
+                        item.itemStyle = {
+                            color: 'transparent',
+                            borderColor: color
+                        };
+                    }
+                    return item
+                })
+            }
+            var option = {
+                type: "tree",
+                backgroundColor: "#000",
+                toolbox: { //工具栏
+                    show: true,
+                    iconStyle: {
+                        borderColor: "#03ceda"
+                    },
+                    feature: {
+                        restore: {}
+                    }
+                },
+                tooltip: {//提示框
+                    trigger: "item",
+                    triggerOn: "mousemove",
+                    backgroundColor: "rgba(1,70,86,1)",
+                    borderColor: "rgba(0,246,255,1)",
+                    borderWidth: 0.5,
+                    textStyle: {
+                        fontSize: 10
+                    }
+                },
+                series: [
+                    {
+                        type: "tree",
+                        hoverAnimation: true, //hover样式
+                        data: getdata(),
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        layout: "radial",
+                        symbol: "circle",
+                        symbolSize: 10,
+                        nodePadding: 20,
+                        animationDurationUpdate: 750,
+                        expandAndCollapse: true, //子树折叠和展开的交互，默认打开
+                        initialTreeDepth: 3,
+                        roam: true, //是否开启鼠标缩放和平移漫游。scale/move/true
+                        focusNodeAdjacency: true,
+                        itemStyle: {
+                            borderWidth: 1,
+                        },
+                        label: { //标签样式
+                            color: "#fff",
+                            fontSize: 20,
+                            fontFamily: "SourceHanSansCN",
+                            position: "inside",
+                            rotate: 0,
+                        },
+                        lineStyle: {
+                            width: 1,
+                            curveness: 0.5,
+                        }
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        });
+
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .echart-div-css {
+            background: url("https://wechat.aixueshi.top/danao1.jpg");
+            -moz-background-size: 100% 100%;
+            background-size: 100% 100%;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .echart-div-child-css {
+            background: #000;
+            overflow: hidden;
+        }
+    </style>
+</body>
+
+</html>

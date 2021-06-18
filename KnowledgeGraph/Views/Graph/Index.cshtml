@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "知识图谱/数学";
+}
+
+
+<body style="background: #303030; height: 100vh; width: 100vw; overflow: hidden; ">
+    <div id="main" style=" height: 100vh; width: 100vw " />
+</body>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/echarts.js"></script>
+<script>
+    myChart = echarts.init(document.getElementById('main'));
+
+
+    $.post('Graph/GetGraph', null, function (resJson) {
+        var res = JSON.parse(resJson);
+        if (res.Success) {
+            option = {
+                //legend: [{
+                //    // selectedMode: 'single',
+                //    data: res.Result.categories
+                //}],
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    roam: true,
+                    label: {
+                        position: 'right',
+                        formatter: '{b}'
+                    },
+                    draggable: true,
+                    data: res.Result.nodes,
+                    categories: res.Result.categories,
+                    force: {
+                        repulsion: 50
+                    },
+                    edges: res.Result.links
+                }]
+            };
+            myChart.setOption(option);
+        }
+        else
+            alert('请求失败');
+    });
+</script>

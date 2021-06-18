@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WpfApp2": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "USBCAMERA_WPF": "true"
+      }
+    }
+  }
+}

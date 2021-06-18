@@ -1,0 +1,153 @@
+﻿<html>
+<header>
+    <meta charset="utf-8">
+    </meta>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/echarts.js"></script>
+</header>
+
+<body>
+    <div id="echart-div" class="echart-div-css">
+        <div id="echart-div-child" class="echart-div-child-css" style="width: 100%;height: 100%;">
+        </div>
+    </div>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('echart-div-child'));
+        let jsonData = []
+        $.post("GetGraph", {}, function (res) {
+            jsonData = JSON.parse(res)
+            console.log('jsonData', jsonData)
+
+            var getdata = function getData() {
+                let data = {
+                    name: "知识图谱",
+                    value: '0',
+                    children: []
+                }
+                jsonData.Result.nodes.forEach(function (node1, i) {
+                    if (jsonData.Result.links.findIndex(l => l.target == node1.id) == -1) {
+                        let item1 = {
+                            name: node1.name,
+                            value: node1.id,
+                            children: []
+                        }
+                        data.children.push(item1)
+                        jsonData.Result.links.filter(l => l.source == node1.id).forEach(function (link1, linki) {
+                            var node2 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link1.target)]
+                            let item2 = {
+                                name: node2.name,
+                                value: node2.id,
+                                children: []
+                            }
+                            item1.children.push(item2)
+                            jsonData.Result.links.filter(l => l.source == node2.id).forEach(function (link2, linki) {
+                                var node3 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link2.target)]
+                                let item3 = {
+                                    name: node3.name,
+                                    value: node3.id,
+                                    children: []
+                                }
+                                item2.children.push(item3)
+                                jsonData.Result.links.filter(l => l.source == node3.id).forEach(function (link3, linki) {
+                                    var node4 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link3.target)]
+                                    let item4 = {
+                                        name: node4.name,
+                                        value: node4.id,
+                                        children: []
+                                    }
+                                    item3.children.push(item4)
+                                    jsonData.Result.links.filter(l => l.source == node4.id).forEach(function (link4, linki) {
+                                        var node5 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link4.target)]
+                                        let item5 = {
+                                            name: node5.name,
+                                            value: node5.id,
+                                            children: []
+                                        }
+                                        item4.children.push(item5)
+                                        jsonData.Result.links.filter(l => l.source == node5.id).forEach(function (link5, linki) {
+                                            var node6 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link5.target)]
+                                            let item6 = {
+                                                name: node6.name,
+                                                value: node6.id,
+                                                children: []
+                                            }
+                                            item5.children.push(item6)
+                                            jsonData.Result.links.filter(l => l.source == node6.id).forEach(function (link6, linki) {
+                                                var node7 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link6.target)]
+                                                let item7 = {
+                                                    name: node6.name,
+                                                    value: node6.id,
+                                                    children: []
+                                                }
+                                                item6.children.push(item7)
+                                            })
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    }
+                })
+                let arr = []
+                arr.push(data)
+                return arr;
+            }
+            myChart.hideLoading();
+
+            myChart.setOption(option = {
+                tooltip: {
+                    trigger: 'item',
+                    triggerOn: 'mousemove'
+                },
+                series: [
+                    {
+                        type: 'tree',
+                        roam: true,
+                        data: getdata(),
+
+                        top: '18%',
+                        bottom: '14%',
+
+                        layout: 'radial',
+
+                        symbol: 'emptyCircle',
+
+                        symbolSize: 7,
+
+                        initialTreeDepth: 4,
+
+                        animationDurationUpdate: 750,
+
+                        emphasis: {
+                            focus: 'descendant'
+                        }
+                    }
+                ]
+            });
+            myChart.setOption(option);
+        });
+
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .echart-div-css {
+            background: url("https://wechat.aixueshi.top/danao1.jpg");
+            -moz-background-size: 100% 100%;
+            background-size: 100% 100%;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .echart-div-child-css {
+            background: white;
+            overflow: hidden;
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <title>爱学仕知识图谱</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            touch-action: none;
+        }
+
+        :root {
+            --accent-color: #45494E;
+            --gradient-color: #FBFBFB;
+        }
+
+        a:after {
+            content: "";
+            background: #FBFBFB;
+            position: absolute;
+            bottom: 5px;
+            left: 15px;
+            height: 3px;
+            width: 0;
+            transition: .5s;
+            transition-delay: .2s;
+        }
+
+        .menu {
+            position: fixed;
+            top: 100px;
+            left: 100px;
+            width: 100px;
+            font-size: 12px;
+            z-index: 999;
+        }
+
+            .menu > ol {
+                list-style: none;
+                padding: 0;
+            }
+
+                .menu > ol > li {
+                    background: rgba(0,0,0,0.3);
+                    border-left: 5px solid var(--gradient-color);
+                    margin-bottom: 1px;
+                    position: relative;
+                    transition: .5s;
+                }
+
+                    .menu > ol > li:nth-child(1) {
+                        --accent-color: #FDA085;
+                        --gradient-color: #F6D365;
+                    }
+
+                    .menu > ol > li:nth-child(2) {
+                        --accent-color: #D8B5FF;
+                        --gradient-color: #1EAE98;
+                    }
+
+                    .menu > ol > li:nth-child(3) {
+                        --accent-color: #EA8D8D;
+                        --gradient-color: #A890FE;
+                    }
+
+                    .menu > ol > li:nth-child(4) {
+                        --accent-color: #BFF098;
+                        --gradient-color: #6FD6FF;
+                    }
+
+                    .menu > ol > li:nth-child(5) {
+                        --accent-color: #C6EA8D;
+                        --gradient-color: #FE90AF;
+                    }
+
+                    .menu > ol > li:nth-child(6) {
+                        --accent-color: #8dbaea;
+                        --gradient-color: #FE90AF;
+                    }
+
+                    .menu > ol > li:nth-child(7) {
+                        --accent-color: red;
+                        --gradient-color: blue;
+                    }
+
+                    .menu > ol > li a {
+                        color: #FBFBFB;
+                        display: block;
+                        padding: 15px;
+                        position: relative;
+                        text-decoration: none;
+                        z-index: 1;
+                    }
+
+                .menu > ol > .active:after {
+                    background: linear-gradient(to left, var(--accent-color), var(--gradient-color));
+                    max-width: 800px;
+                }
+
+                .menu > ol > li:focus .sub-menu,
+                .menu > ol > li:focus-within .sub-menu {
+                    max-height: 500px;
+                }
+
+                .menu > ol > li:after {
+                    background: #3c3c3c;
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
+                    transition: .5s;
+                    max-width: 0;
+                    overflow: hidden;
+                }
+
+        a:hover:after {
+            width: 50px;
+        }
+
+        a:after {
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        .active > a:after {
+            width: 50px;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        .menu > ol {
+            display: block;
+            max-width: none;
+            text-align: center;
+        }
+
+            .menu > ol > li {
+                border-top: 5px solid var(--accent-color);
+                border-left: 0;
+                display: inline-block;
+                margin-left: -5px;
+                vertical-align: top;
+                width: 150px;
+            }
+
+            .menu > ol > .active:after {
+                background: linear-gradient(to bottom, var(--accent-color), var(--gradient-color));
+                border-radius: 3px;
+                top: -5px;
+                bottom: -5px;
+                left: -5px;
+                right: -5px;
+            }
+
+        .container-div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .content1 {
+            padding: 0 250px;
+            height: 700px;
+            background: -webkit-linear-gradient(to bottom, #fda0856b, #f6d36585);
+            background: linear-gradient(to bottom, #fda0856b, #f6d36585);
+        }
+
+        .content2 {
+            padding: 0 250px;
+            height: 700px;
+            background: -webkit-linear-gradient(to bottom, #bff0986b, #6fd6ff85);
+            background: linear-gradient(to bottom, #bff0986b, #6fd6ff85);
+        }
+
+        .content3 {
+            padding: 0 250px;
+            height: 700px;
+            background: -webkit-linear-gradient(to bottom, #ea8d8d6b, #a890fe85);
+            background: linear-gradient(to bottom, #ea8d8d6b, #a890fe85);
+        }
+
+        .content4 {
+            padding: 0 250px;
+            height: 700px;
+            background: -webkit-linear-gradient(to bottom, #d8b5ff6b, #1eae9885);
+            background: linear-gradient(to bottom, #d8b5ff6b, #1eae9885);
+        }
+
+        .content5 {
+            padding: 0 250px;
+            height: 700px;
+            background: -webkit-linear-gradient(to bottom, #c6ea8d6b, #fe90af85);
+            background: linear-gradient(to bottom, #c6ea8d6b, #fe90af85);
+        }
+
+        .content6 {
+            padding: 0 250px;
+            height: 700px;
+            background: -webkit-linear-gradient(to bottom, #8dbaea6b, #fe90af85);
+            background: linear-gradient(to bottom, #8dbaea6b, #fe90af85);
+        }
+    </style>
+</head>
+<body>
+    <nav class="menu">
+        <ol>
+            <li id="menu1" class="menu-item active">
+                <a href="Graph" target="iframe">数学知识图谱-关系</a>
+            </li>
+            <li id="menu2" class="menu-item">
+                <a href="Graph/English" target="iframe">英语知识图谱-关系</a>
+            </li>
+            <li id="menu3" class="menu-item">
+                <a href="Graph/Math_Yuan" target="iframe">数学知识图谱-脑子</a>
+            </li>
+            <li id="menu4" class="menu-item">
+                <a href="Graph/English_Yuan" target="iframe">英语知识图谱-脑子</a>
+            </li>
+            <li id="menu5" class="menu-item">
+                <a href="Graph/Math_Tree" target="iframe">数学知识图谱-树-1</a>
+            </li>
+            <li id="menu6" class="menu-item">
+                <a href="Graph/Math_Tree_1" target="iframe">数学知识图谱-树-2</a>
+            </li>
+            <li id="menu7" class="menu-item">
+                <a href="https://web.aixueshi.top/brainmap/example/LeYiXue/index.html" target="iframe">数学知识图谱-3D</a>
+            </li>
+        </ol>
+    </nav>
+    <div style="height: 100vh; width: 100vw; overflow: hidden; z-index:-99; position: absolute;top:0px;left:0px">
+        <iframe name="iframe" width="100%" height="100%" frameborder="0" src="Graph"></iframe>
+    </div>
+    <script>
+        $(function () {
+
+            $('#menu1').click(function () {
+                $("ol li").removeClass('active')
+                $('#menu1').addClass('active');
+            })
+
+            $('#menu2').click(function () {
+                $("ol li").removeClass('active')
+                $('#menu2').addClass('active');
+            })
+
+            $('#menu3').click(function () {
+                $("ol li").removeClass('active')
+                $('#menu3').addClass('active');
+            })
+
+            $('#menu4').click(function () {
+                $("ol li").removeClass('active')
+                $('#menu4').addClass('active');
+            })
+
+            $('#menu5').click(function () {
+                $("ol li").removeClass('active')
+                $('#menu5').addClass('active');
+            })
+
+            $('#menu6').click(function () {
+                $("ol li").removeClass('active')
+                $('#menu6').addClass('active');
+            })
+
+            $('#menu7').click(function () {
+                $("ol li").removeClass('active')
+                $('#menu7').addClass('active');
+            })
+
+        })
+    </script>
+</body>
+</html>

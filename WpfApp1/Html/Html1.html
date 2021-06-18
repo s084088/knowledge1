@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+
+<html lang="zh-cn" xmlns="http://www.w3.org/1999/xhtml">
+<!-- saved from url=(0013)about:internet -->
+<head>
+    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=5,6,7,8,9,10,11, chrome=1" />
+    <title>ECharts</title>
+</head>
+
+<body>
+    <h1>html页面</h1>
+    <div id="main" style="margin:-8px;height:500px" />
+    <script src="echarts.js"></script>
+    <script>
+        myChart = echarts.init(document.getElementById('main'));
+
+        $.post('Login/SubmitLogin', { userName: u.val(), password: p.val() }, function (resJson) {
+            var res = JSON.parse(resJson);
+            if (res.Success)
+                window.location = 'Main';
+            else
+                alert('登录失败');
+        });
+
+
+        var graph = {};
+        graph.nodes = new Array();
+        graph.nodes[0] = new Object;
+        graph.nodes[0].id = "1";
+        graph.nodes[0].name = "Myriel";
+
+        graph.nodes[1] = new Object;
+        graph.nodes[1].id = "2";
+        graph.nodes[1].name = "Myriel1";
+
+        graph.links = new Array();
+        graph.links[0] = new Object();
+        graph.links[0].source = "1";
+        graph.links[0].target = "2";
+
+
+        console.log(graph);
+
+        option = {
+            legend: {
+                data: ['HTMLElement', 'WebGL', 'SVG', 'CSS', 'Other']
+            },
+            series: [{
+                type: 'graph',
+                layout: 'force',
+                animation: false,
+                label: {
+                    position: 'right',
+                    formatter: '{b}'
+                },
+                draggable: true,
+                data: graph.nodes,
+                categories: graph.categories,
+                force: {
+                    edgeLength: 20,
+                    repulsion: 40,
+                    gravity: 0.1
+                },
+                edges: graph.links
+            }]
+        };
+
+
+        myChart.setOption(option);
+
+
+        function jsShowHide(info) {
+            if (info == 0) {
+                myChart.clear();
+            }
+            else {
+                myChart.setOption(option);
+            }
+        }
+        function jsPushData(obj) {
+            //option.xAxis.data.push(x);
+            option.series[0].data = obj.nodes;
+            option.series[0].edges = obj.links;
+
+            myChart.setOption(option);
+        }
+    </script>
+</body>
+</html>

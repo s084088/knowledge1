@@ -1,0 +1,545 @@
+﻿<html>
+<header>
+    <meta charset="utf-8" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/echarts.js"></script>
+
+</header>
+
+<body style="background: #303030; height: 100vh; width: 100vw; overflow: hidden;">
+    <div id="echart-div" class="echart-div-css">
+        <div id="echart-div-child" class="echart-div-child-css" style="width: 100%;height: 100%;">
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        var myChart = echarts.init(document.getElementById('echart-div-child'));
+        let jsonData = []
+        let items = []
+        let nodes1 = []
+        let nodes2 = []
+        let nodes3 = []
+        let nodes4 = []
+        let nodes5 = []
+        let nodes6 = []
+        let nodes7 = []
+
+        let nowWeight = 0; //当前权重
+        let allWeight = 0; //总权重
+
+        //获取顺时针圆周上N个等分点的坐标,r是半径，ox和oy是原点坐标，count是等分点数量
+        function getPoint(r, ox, oy, count) {
+            let point = []
+            var radians = (Math.PI / 180) * 360 / count, //弧度
+                i = 0;
+            for (; i < count; i++) {
+                var x = ox + r * Math.sin(radians * i),
+                    y = oy + r * Math.cos(radians * i);
+
+                point.push([x, y]); //为保持数据顺时针
+            }
+            return point;
+        }
+        //递归求权重
+        function GetWeight(node) {
+            node.weight = 0;
+            var links = jsonData.Result.links.filter(l => l.source == node.id);
+            if (links == null || links.length == 0) {
+                nowWeight = nowWeight + 1;
+                allWeight = allWeight + 1;
+                node.weight = 1;
+            }
+            else {
+                links.forEach(function (link, linki) {
+                    var node2 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link.target)];
+                    node.weight = node.weight + GetWeight(node2);
+                })
+            }
+
+            node.nowWeight = nowWeight - node.weight / 2;
+            return node.weight;
+        }
+        $.post("GetEnglishGraph", {}, function (res) {
+            jsonData = JSON.parse(res)
+            jsonData.Result.nodes.forEach(function (node1, i) {
+                //第一圈
+                if (jsonData.Result.links.findIndex(l => l.target == node1.id) == -1) {
+
+                    //取权重
+                    GetWeight(node1);
+
+                    nodes1.push({
+                        symbol: "",
+                        id: node1.id,
+                        name: node1.name,
+                        weight: node1.weight,
+                        nowWeight: node1.nowWeight,
+                        pointType: "cloud",
+                        topest: node1.name,
+                        level: 1
+                    })
+                    //第二圈
+                    jsonData.Result.links.filter(l => l.source == node1.id).forEach(function (link, linki) {
+                        var node2 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == link.target)]
+                        if (node2.id == '278') console.log('2861--', node2)
+                        if (nodes2.findIndex(l => l.id == node2.id) == -1) {
+                            let node2Item = {
+                                symbol: "",
+                                id: node2.id,
+                                name: node2.name,
+                                weight: node2.weight,
+                                nowWeight: node2.nowWeight,
+                                pointType: "point",
+                                belong: node1.name,
+                                belongId: node1.id,
+                                label: {
+                                    show: true,
+                                    offset: [10, 5]
+                                },
+                                level: 2,
+                                topest: node1.name,
+                                childNum: 0
+                            }
+                            nodes2.push(node2Item)
+                            //第三圈
+                            if (node2.id == 278) console.log('2782--', jsonData.Result.links.filter(l => l.source == node2.id))
+                            jsonData.Result.links.filter(l => l.source == node2.id).forEach(function (childLink, childLinki) {
+                                var node3 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == childLink.target)]
+                                if (node2.id == 278) {
+                                    console.log('2783--', node3)
+                                    console.log('2784--', nodes3)
+                                }
+
+                                if (nodes3.findIndex(l => l.id == node3.id) == -1) {
+                                    let node3Item = {
+                                        symbol: "",
+                                        id: node3.id,
+                                        name: node3.name,
+                                        weight: node3.weight,
+                                        nowWeight: node3.nowWeight,
+                                        pointType: "point",
+                                        belong: node2.name,
+                                        belongId: node2.id,
+                                        label: {
+                                            show: true,
+                                            offset: [10, 5]
+                                        },
+                                        level: 3,
+                                        topest: node1.name,
+                                        childNum: 0
+                                    }
+                                    nodes3.push(node3Item)
+                                    node2Item.childNum = node2Item.childNum + 1
+                                    //第四圈
+                                    jsonData.Result.links.filter(l => l.source == node3.id).forEach(function (childChildLink, childChildLinki) {
+                                        var node4 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == childChildLink.target)]
+                                        if (node4 != null && nodes4.findIndex(l => l.id == node4.id) == -1) {
+                                            let node4Item = {
+                                                symbol: "",
+                                                id: node4.id,
+                                                name: node4.name,
+                                                weight: node4.weight,
+                                                nowWeight: node4.nowWeight,
+                                                pointType: "point",
+                                                belong: node3.name,
+                                                belongId: node3.id,
+                                                label: {
+                                                    show: true,
+                                                    offset: [10, 5]
+                                                },
+                                                level: 4,
+                                                topest: node1.name,
+                                                childNum: 0
+                                            }
+                                            nodes4.push(node4Item)
+                                            node3Item.childNum = node3Item.childNum + 1
+                                            //第五圈
+                                            jsonData.Result.links.filter(l => l.source == node4.id).forEach(function (childChildChildLink, childChildChildLinki) {
+                                                var node5 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == childChildChildLink.target)]
+                                                if (node5 != null && nodes5.findIndex(l => l.id == node5.id) == -1) {
+                                                    let node5Item = {
+                                                        symbol: "",
+                                                        id: node5.id,
+                                                        name: node5.name,
+                                                        weight: node5.weight,
+                                                        nowWeight: node5.nowWeight,
+                                                        pointType: "point",
+                                                        belong: node4.name,
+                                                        belongId: node4.id,
+                                                        label: {
+                                                            show: true,
+                                                            offset: [10, 5]
+                                                        },
+                                                        level: 5,
+                                                        topest: node1.name,
+                                                        childNum: 0
+                                                    }
+                                                    nodes5.push(node5Item)
+                                                    node4Item.childNum = node4Item.childNum + 1
+                                                    //第六圈
+                                                    jsonData.Result.links.filter(l => l.source == node5.id).forEach(function (childChildChildChildLink, childChildChildChildLinki) {
+                                                        var node6 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == childChildChildChildLink.target)]
+                                                        if (node6 != null && nodes6.findIndex(l => l.id == node6.id) == -1) {
+                                                            let node6Item = {
+                                                                symbol: "",
+                                                                id: node6.id,
+                                                                name: node6.name,
+                                                                weight: node6.weight,
+                                                                nowWeight: node6.nowWeight,
+                                                                pointType: "point",
+                                                                belong: node5.name,
+                                                                belongId: node5.id,
+                                                                label: {
+                                                                    show: true,
+                                                                    offset: [10, 5]
+                                                                },
+                                                                level: 6,
+                                                                topest: node1.name,
+                                                                childNum: 0
+                                                            }
+                                                            nodes6.push(node6Item)
+                                                            node5Item.childNum = node5Item.childNum + 1
+                                                            //第七圈
+                                                            jsonData.Result.links.filter(l => l.source == node6.id).forEach(function (childChildChildChildChildLink, childChildChildChildChildLinki) {
+                                                                var node7 = jsonData.Result.nodes[jsonData.Result.nodes.findIndex(l => l.id == childChildChildChildChildLink.target)]
+                                                                if (node7 != null && nodes7.findIndex(l => l.id == node7.id) == -1) {
+                                                                    let node7Item = {
+                                                                        symbol: "",
+                                                                        id: node7.id,
+                                                                        name: node7.name,
+                                                                        weight: node7.weight,
+                                                                        nowWeight: node7.nowWeight,
+                                                                        pointType: "point",
+                                                                        belong: node6.name,
+                                                                        belongId: node6.id,
+                                                                        label: {
+                                                                            show: true,
+                                                                            offset: [10, 5]
+                                                                        },
+                                                                        level: 7,
+                                                                        topest: node1.name,
+                                                                        childNum: 0
+                                                                    }
+                                                                    nodes7.push(node7Item)
+                                                                    node6Item.childNum = node6Item.childNum + 1
+                                                                }
+                                                            })
+                                                        }
+                                                    })
+                                                }
+                                            })
+                                        }
+                                    })
+
+                                }
+                            })
+                        }
+
+                    })
+
+                }
+            })
+            let nodes1Points = getPoint(10, 0, 0, allWeight * 2)
+            nodes1.forEach(function (item, i) {
+                item.value = nodes1Points[item.nowWeight * 2]
+                items.push(item)
+            })
+
+            let nodes2Points = getPoint(30, 0, 0, allWeight * 2)
+            nodes2.forEach(function (item, i) {
+                item.value = nodes2Points[item.nowWeight * 2]
+                items.push(item)
+            })
+
+            let nodes3Points = getPoint(50, 0, 0, allWeight * 2)
+            nodes3.forEach(function (item, i) {
+                item.value = nodes3Points[item.nowWeight * 2]
+                items.push(item)
+            })
+
+            let nodes4Points = getPoint(70, 0, 0, allWeight * 2)
+            nodes4.forEach(function (item, i) {
+                item.value = nodes4Points[item.nowWeight * 2]
+                if (items.findIndex(l => l.id == item.id) == -1) {
+                    items.push(item)
+                }
+            })
+
+            let nodes5Points = getPoint(90, 0, 0, allWeight * 2)
+            nodes5.forEach(function (item, i) {
+                item.value = nodes5Points[item.nowWeight * 2]
+                if (items.findIndex(l => l.id == item.id) == -1) {
+                    items.push(item)
+                }
+            })
+
+            let nodes6Points = getPoint(110, 0, 0, allWeight * 2)
+            nodes6.forEach(function (item, i) {
+                item.value = nodes6Points[item.nowWeight * 2]
+                if (items.findIndex(l => l.id == item.id) == -1) {
+                    items.push(item)
+                }
+            })
+
+            let nodes7Points = getPoint(130, 0, 0, allWeight * 2)
+            nodes7.forEach(function (item, i) {
+                item.value = nodes7Points[item.nowWeight * 2]
+                if (items.findIndex(l => l.id == item.id) == -1) {
+                    items.push(item)
+                }
+            })
+            items.forEach((el, index) => {
+                el.symbolSize = 20
+                el.label = {
+                    show: true,
+                    color: "rgb(255,255,255)",
+                    width: 200
+                }
+                if (el.value[0] > 0 && el.value[1] > 0) {
+                    el.label.position = 'right'
+                    el.label.rotate = 40
+                    el.label.offset = [10, -30]
+                    if (el.value[0] > 70) {
+                        el.label.position = 'right'
+                        el.label.rotate = 15
+                        el.label.offset = [5, -10]
+                    }
+                }
+                if (el.value[0] > 0 && el.value[1] < 0) {
+                    if (el.level == 7) {
+                        el.label.position = 'right'
+                        el.label.rotate = -20
+                        el.label.offset = [0, 10]
+                    } else {
+                        el.label.position = 'right'
+                        el.label.rotate = -30
+                        el.label.offset = [0, 10]
+                    }
+                }
+                if (el.value[0] < 0 && el.value[1] < 0) {
+                    el.label.position = 'left'
+                    el.label.rotate = 30
+                }
+                if (el.value[0] < 0 && el.value[1] > 0) {
+                    el.label.position = 'left'
+                    el.label.rotate = -30
+                    el.label.offset = [0, -10]
+                }
+                if (el.level == 1) {
+                    el.label.position = 'right'
+                }
+                if (el.level == 2) {
+                    el.label.position = 'right'
+                    el.label.rotate = -30
+                }
+                if (el.level == 3) {
+                    if (el.value[0] > 0 && el.value[1] > 0) {
+                        el.label.position = 'right'
+                        el.label.rotate = 30
+                    }
+                    if (el.value[0] > 0 && el.value[1] < 0) {
+                        el.label.rotate = -15
+                        el.label.position = 'bottom'
+                    }
+                    if (el.value[0] < 0 && el.value[1] < 0) {
+                        el.label.rotate = 15
+                        el.label.position = 'left'
+                        if (el.topest == '词类') {
+                            el.label.rotate = 55
+                            el.label.position = 'left'
+                            el.label.offset = [0, 20]
+                        }
+                    }
+                    if (el.value[0] < 0 && el.value[1] > 0) {
+                        el.label.fontSize = 10
+                        el.label.rotate = -45
+                        el.label.position = 'left'
+                    }
+                }
+                if (el.level == 4) {
+                    if (el.value[0] > 0 && el.value[1] > 0) {
+                        el.label.position = 'right'
+                        el.label.rotate = 30
+                    }
+                    if (el.value[0] > 0 && el.value[1] < 0) {
+                        el.label.position = 'right'
+                        el.label.rotate = -30
+                        el.label.offset = [0, 10]
+                    }
+                    if (el.value[0] < 0 && el.value[1] < 0) {
+                        el.label.position = 'left'
+                        el.label.rotate = 30
+                    }
+                    if (el.value[0] < 0 && el.value[1] > 0) {
+                        el.label.position = 'left'
+                        el.label.rotate = -30
+                        el.label.offset = [0, -10]
+                        if (el.value[0] > -50) {
+                            el.label.position = 'right'
+                            el.label.rotate = 60
+                            el.label.offset = [10, -20]
+                        }
+                    }
+                }
+
+
+                //颜色设置
+                if (el.topest == '时态') {
+                    el.itemStyle = {
+                        color: '#D95B5B'
+                    };
+                } else if (el.topest == '句子') {
+                    el.itemStyle = {
+                        color: '#51D9B5'
+                    };
+                } else {
+                    el.itemStyle = {
+                        color: '#F2CF61'
+                    };
+                }
+            });
+            const dataArr = []
+            const targetCoord = [0, 0];
+            items.forEach(el => {
+                if (el.belong) {
+                    items.forEach(element => {
+                        if (el.belongId == element.id) {
+                            dataArr.push([{
+                                coord: element.value
+                            },
+                            {
+                                coord: el.value
+                            }
+                            ]);
+                        }
+                    });
+                } else if (el.pointType != 'none') {
+                    dataArr.push([{
+                        coord: targetCoord
+                    },
+                    {
+                        coord: el.value
+                    }
+                    ]);
+                }
+            });
+            var option = {
+                backgroundColor: '#000',
+                legend: [],
+                grid: {
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                },
+                xAxis: {
+                    show: false,
+                    type: "value",
+                    max: 140,
+                    min: -140
+                },
+                yAxis: {
+                    show: false,
+                    type: "value",
+                    max: 140,
+                    min: -140
+                },
+                dataZoom: [
+                    {
+                        type: 'slider',
+                        show: false,
+                        xAxisIndex: [0],
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        type: 'slider',
+                        show: false,
+                        yAxisIndex: [0],
+                        left: '93%',
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        type: 'inside',
+                        xAxisIndex: [0],
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        type: 'inside',
+                        yAxisIndex: [0],
+                        start: 0,
+                        end: 100
+                    }
+                ],
+                series: [{
+                    type: "graph",
+                    layout: "none",
+                    roam: true,
+                    coordinateSystem: "cartesian2d",
+                    symbolSize: [10, 10],
+                    z: 3,
+                    circular: {
+                        rotateLabel: true
+                    },
+                    itemStyle: {
+                        normal: {
+                            shadowColor: "none"
+                        }
+                    },
+                    data: items
+                },
+                {
+                    name: "",
+                    roam: true,
+                    type: "lines",
+                    coordinateSystem: "cartesian2d",
+                    z: 1,
+                    effect: {
+                        show: true,
+                        smooth: false,
+                        trailLength: 0,
+                        symbol: "image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAhCAYAAADtR0oPAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAAB2ElEQVQ4T32USU7DQBBFbcKMAAFigcSSg3ADtmzZc0juwQ6JMA9hCBAG81/Rv9W2HEp6cae7fk1tuW6appLVCWwmPTEOw0H2ww8CHHEaiLmERTh9ic/0bBBwiNOiWE7MCwynsXgVH2KCYFYLnNfFhtgSiMj8Lu4TIzFGQLQ1sS12xZFA8CZuxYk4FVdiRDmwIBDtiH1xIA7FsdgTZF4SA5xJTcNE3RSeio1gq4I+a08DAaWtiBhfMpqmP0T0mgXlaL/ZSMY4icx+3JMFRKUUnozPNhHs+TzuwBtEJiJztzEpAlBaXBwCR0bAIZdkQ2xBBC4FbJLhWdhehAUEzBn4A9SMkw0xe87QKolNDh+FjTUZyEzAXJKzcMA7Y0PgDFNLehC2O9HbQ5mBHnDAeEvLKYUA448z8EozTvZ4W8sessAZEHBZ3AWi8h6ikq6ASGSgrCfRvbj8LiFgk0MEzJ9psfaU8Gm9fGVJRKdhMljQyoCx6ZIYLSN1hmhYtEpik5LIgPNNWpdNt0pik2hEZZyXad1bkpt2D0S/EGUPvSW5Bz4pQ0E5UzN4Sjhdi3Pxb9NEcQbqPxNuGEGYv94Iux9ll1ESH2M9wywyWDj9LWOdM9hKZxsOyamqfgG1ZQ8JFbfSTwAAAABJRU5ErkJggg==",
+                        symbolSize: [10, 30],
+                        period: 4,
+                        delay: 2
+                    },
+
+                    lineStyle: {
+                        width: 2,
+                        color: 'rgb(255,255,255)',
+                        curveness: 0
+                    },
+                    data: dataArr
+                }
+                ]
+            };
+            myChart.setOption(option);
+        });
+
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .echart-div-css {
+            background: url("https://wechat.aixueshi.top/danao1.jpg");
+            -moz-background-size: 100% 100%;
+            background-size: 100% 100%;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .echart-div-child-css {
+            background: #000;
+            overflow: hidden;
+        }
+    </style>
+</body>
+
+</html>

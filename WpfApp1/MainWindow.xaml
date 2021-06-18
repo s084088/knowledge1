@@ -1,0 +1,139 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:materialDesignColors="clr-namespace:MaterialDesignColors;assembly=MaterialDesignColors"
+        xmlns:local="clr-namespace:WpfApp1" 
+        mc:Ignorable="d" WindowState="Maximized"
+        Title="MainWindow" Height="800" Width="1200">
+    <materialDesign:DialogHost Identifier="RootDialog">
+        <Grid >
+
+            <Grid x:Name="G1"/>
+
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <materialDesign:Card Margin="10"  Grid.Column="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                            <Button Content="添加" Margin="5" Command="{Binding AddEntityCommand,Mode=OneTime}"/>
+                            <Button Content="修改" Margin="5" Command="{Binding EditEntityCommand,Mode=OneTime}"/>
+                            <Button Content="删除" Margin="5" Command="{Binding DeleteEntityCommand,Mode=OneTime}"/>
+                        </StackPanel>
+
+                        <ListBox Grid.Row="1" Margin="10" ItemsSource="{Binding Entities}" VerticalContentAlignment="Center" SelectedItem="{Binding Entity}" >
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid  Height="32">
+                                        <TextBlock  Text="{Binding Name,Mode=TwoWay}" VerticalAlignment="Center"  TextAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                    </Grid>
+                </materialDesign:Card>
+                <GridSplitter Grid.Column="0" Width="5" BorderBrush="Transparent" Background="Transparent"/>
+                <materialDesign:Card Margin="10" Grid.Column="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                            <Button Content="添加" Margin="5" Command="{Binding AddKPCommand,Mode=OneTime}"/>
+                            <Button Content="修改" Margin="5" Command="{Binding EditKPCommand,Mode=OneTime}"/>
+                            <Button Content="删除" Margin="5" Command="{Binding DeleteKPCommand,Mode=OneTime}"/>
+                        </StackPanel>
+
+                        <ListBox Grid.Row="1" Margin="10" ItemsSource="{Binding Entity.EKPs}" SelectedItem="{Binding EKP}"  HorizontalContentAlignment="Stretch">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="{Binding KP.Name}" VerticalAlignment="Center" TextAlignment="Left"/>
+
+                                        <Button Grid.Column="1" Content="←" Style="{StaticResource MaterialDesignToolButton}" CommandParameter="{Binding KP}" ToolTip="设置为前置知识点"
+                                           Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Path=DataContext.AddPrecondition, Mode=OneTime}" />
+
+                                        <Button Grid.Column="2" Content="◎" Style="{StaticResource MaterialDesignToolButton}" CommandParameter="{Binding KP}" ToolTip="选中当前知识点"
+                                           Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Path=DataContext.SelectKP, Mode=OneTime}" />
+
+                                        <Button Grid.Column="3" Content="→" Style="{StaticResource MaterialDesignToolButton}" CommandParameter="{Binding KP}" ToolTip="设置为扩展知识点"
+                                           Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Path=DataContext.AddExtend, Mode=OneTime}" />
+
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                    </Grid>
+                </materialDesign:Card>
+                <GridSplitter Grid.Column="1" Width="5" BorderBrush="Transparent" Background="Transparent"/>
+                <materialDesign:Card Margin="10" Grid.Column="2" Background="Transparent">
+
+                    <Grid Margin="100 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ItemsControl Grid.Column="2" ItemsSource="{Binding KP.Extends}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource MaterialDesignFloatingActionAccentButton}" Width="80" Height="80" Margin="0 10" Content="{Binding Target.Name}"  CommandParameter="{Binding Target}" Loaded="Button_Loaded" 
+                                         Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Path=DataContext.SelectKP, Mode=OneTime}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+
+                        <Button x:Name="B1" Grid.Column="1" 
+                                        Style="{StaticResource MaterialDesignFloatingActionButton}" materialDesign:ButtonProgressAssist.IsIndicatorVisible="True"
+                                        materialDesign:ButtonProgressAssist.Value="-1" materialDesign:ButtonProgressAssist.IsIndeterminate="True"
+                                        Visibility="{Binding IsShow}" Width="100" Height="100" Content="{Binding KP.Name}" />
+
+                        <ItemsControl x:Name="I1" Grid.Column="0" ItemsSource="{Binding KP.Preconditions}" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource MaterialDesignFloatingActionAccentButton}" Width="80" Height="80" Margin="0 10" Content="{Binding Origin.Name}"  CommandParameter="{Binding Origin}" Loaded="Button_Loaded" 
+                                        Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Path=DataContext.SelectKP, Mode=OneTime}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </Grid>
+
+                </materialDesign:Card>
+
+            </Grid>
+
+        </Grid>
+    </materialDesign:DialogHost>
+
+</Window>
